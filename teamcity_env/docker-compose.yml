@@ -1,0 +1,25 @@
+version: '2'
+
+services:
+  teamcity:
+    image: 'jetbrains/teamcity-server'
+    volumes:
+      - '/opt/teamcity/data:/data/teamcity_server/datadir'
+      - '/opt/teamcity/logs:/data/teamcity/logs'
+    ports:
+      - 8111:8111
+    environment:
+      - TEAMCITY_SERVER_MEM_OPTS="-Xmx750m"
+      # - XX:ReservedCodeCacheSize=<value>
+      # -XX:MaxPermSize
+
+  teamcity-agent:
+    image: 'jetbrains/teamcity-agent'
+    build:
+      context: .
+    volumes:
+      - '/opt/teamcity-agent:/data/teamcity_agent/conf'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    environment:
+      - SERVER_URL=teamcity:8111
+      - DOCKER_IN_DOCKER=start
