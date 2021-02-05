@@ -1,0 +1,30 @@
+FROM jetbrains/teamcity-agent
+USER root
+
+RUN mkdir -p /root/.ssh
+
+COPY  id_rsa.pub  /root/.ssh/authorized_keys
+COPY  id_rsa  /root/.ssh/id_rsa
+
+RUN chmod 700 /root/.ssh && \
+chmod 640 /root/.ssh/authorized_keys && \
+chown root:root -R /root/.ssh
+
+RUN chown -R root:root /opt /data /var/run
+
+RUN set -eux; \
+        apt-get update; \
+        apt-get install -y --no-install-recommends \
+            python3-setuptools \
+            python3-pip \
+        ; \
+        rm -rf /var/lib/apt/lists/*
+
+RUN pip3 --no-cache-dir install -U awscli
+
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+RUN chmod +x ./kubectl
+RUN mv ./kubectl /usr/local/bin
+
+RUN apt-get clean
+
